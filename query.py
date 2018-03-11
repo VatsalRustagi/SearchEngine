@@ -1,5 +1,6 @@
 import json
 import search_utils
+from collections import defaultdict
 
 class QueryHandler:
     def __init__(self):
@@ -11,24 +12,26 @@ class QueryHandler:
             file = open("Indexes/{}.txt".format(query[0]), "r")
             d = dict(eval(file.read()))
             self.cache[query[0]] = d
-        else:
-            if query in self.cache[query[0]].keys():
-                l = sorted(self.cache[query[0]][query], key=lambda x: (-x[2]))[:5]
-                for i, details in enumerate(l, 1):
-                    print("{}. {}".format(i, self.bookkeepingMap[details[0]]))
-            else:
-                print("Couldn't find the word")
+
+        if query in self.cache[query[0]].keys():
+            return self.cache[query[0]][query]
+
+        return None
 
     def lookupQuery(self, words):
+        docIDs = defaultdict(list)
         for word in words:
             if len(word) > 0:
-                self.cacheIndex(word)
+                l = self.cacheIndex(word)
+                for id, _, tfidf in l:
+                    docIDs[id].append([word, tfidf])
             else:
                 print("Please enter a valid query.")
 
+        return docIDs
 
     def getInput(self):
-        userInput = raw_input("Enter Query: ").lower()
+        userInput = raw_input("\nEnter Query: ").lower()
         words = search_utils.simplifyText(userInput).split(" ")
         result = []
         for word in words:
@@ -40,11 +43,23 @@ class QueryHandler:
         JSON = json.loads(open("WEBPAGES_RAW/bookkeeping.json").read())
         return dict(JSON)
 
-    def run(self):
-        while (raw_input("Continue [y/n]?") != 'n'):
-            words = self.getInput()
-            self.lookupQuery(words)
+    def rankingAlgorithm(self, info, additionalInfo=None, results=5):
+        sortedInfo = sorted(info.keys(), key=lambda k: (-len(info[k]), -sum([l[1] for l in info[k]])/len(info[k]) ))
 
+        if len(sortedInfo) < 5:
+            for i,k in enumerate(sortedInfo,1):
+                print("{}. {}".format(i, self.bookkeepingMap[k]))
+        else:
+            for i, k in enumerate(sortedInfo[:5], 1):
+                print("{}. {}".format(i, self.bookkeepingMap[k]))
+
+    def run(self):
+        while (True):
+            words = self.getInput()
+            info = self.lookupQuery(words)
+            self.rankingAlgorithm(info=info)
+            if raw_input("Continue [y/n]? ") == 'n':
+                break
 
 QueryHandler().run()
 
