@@ -21,14 +21,18 @@ class QueryHandler:
 
     def lookupQuery(self, words):
         docIDs = defaultdict(list)
+        searches = []
         for word in words:
             if len(word) > 0:
                 l = self.cacheIndex(word)
-                for id, _, tfidf in l:
-                    docIDs[id].append([word, tfidf])
+                searches.append(l)
+                if l != None:
+                    for id, _, tfidf in l:
+                        docIDs[id].append([word, tfidf])
             else:
                 print("Please enter a valid query.")
-
+        if all([None == s for s in searches]):
+            raise QueryNotFound("Did not find a match for {}".format(' '.join(words)))
         return docIDs
 
     def processInput(self,query):
@@ -62,3 +66,6 @@ class QueryHandler:
         words = self.processInput(query)
         info = self.lookupQuery(words)
         return self.rankingAlgorithm(info=info, results=maxResults)
+
+class QueryNotFound(Exception):
+    pass
