@@ -48,7 +48,7 @@ class QueryHandler:
         return result
 
     def loadJson(self):
-        JSON = json.loads(open("WEBPAGES_RAW/bookkeeping.json").read())
+        JSON = json.loads(open("bookkeeping.json").read())
         return dict(JSON)
 
     def rankingAlgorithm(self, info, additionalInfo=None, results=5):
