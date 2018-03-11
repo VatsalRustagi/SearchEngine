@@ -7,7 +7,7 @@ class SearchEngine:
         self.root = tk.Tk()
         self.root.title("Search")
         self.root.configure(bg = "#4ECDC4")
-        self.root.geometry("500x500")
+        self.root.geometry("440x330")
         self.currentLinks = []
         self.queryHandler = QueryHandler()
 
@@ -21,16 +21,18 @@ class SearchEngine:
         self.inputField = tk.Entry(self.root)
         self.inputField.grid(row=0, column=1, pady=10, padx=10)
 
-        searchButton = tk.Button(self.root, text='Search', command=self.show_query)
-        searchButton.grid(row=0, column=2, pady=10, padx=10)
+        searchButton = tk.Button(self.root, text='Search', command=self.show_query, highlightbackground= self.BACKGROUND)
+        searchButton.grid(row=0, column=2, pady=10, padx=10, ipady=4, ipadx=4)
 
         self.textVars = []
 
         for i in range(5):
             self.textVars.append(tk.StringVar())
             link = tk.Button(self.root, textvariable=self.textVars[-1],
-                             anchor='w', justify='left', cursor='hand1', command=lambda i=i: self.callback(i))
-            link.grid(row=1 + i, column=0, columnspan=3, padx=10, pady=10, sticky=tk.W + tk.E)
+                             anchor='w', justify='left',relief=tk.FLAT,
+                             cursor='hand1', command=lambda i=i: self.callback(i),
+                             activeforeground= "#19B5FE", highlightbackground= self.BACKGROUND)
+            link.grid(row=1 + i, column=0, columnspan=3, padx=10, pady=10, ipady=4, ipadx=4, sticky=tk.W + tk.E)
 
 
     def callback(self, i):
@@ -50,7 +52,7 @@ class SearchEngine:
         for i in range(5):
             el = ""
             if len(self.currentLinks[i]) > 50: el = "..."
-            self.textVars[i].set("Link {} : {}{}".format(i+1, self.currentLinks[i][:50], el))
+            self.textVars[i].set("  Link {} : {}{}".format(i+1, self.currentLinks[i][:50], el))
 
     def popErrorBox(self):
         self.winner = tk.Toplevel()
@@ -63,7 +65,7 @@ class SearchEngine:
 
         button = tk.Button(master=self.winner, text="Ok", command=self.winner.destroy)
         # button.grid(row=1, column=0, padx=10, pady=10)
-        button.pack(fill=tk.X, padx=10, pady=10)
+        button.pack(padx=10, pady=10)
 
     def run(self):
         self.root.mainloop()
