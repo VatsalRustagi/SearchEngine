@@ -10,7 +10,10 @@ class QueryHandler:
 
     def cacheIndex(self, query):
         if query[0] not in self.cache.keys():
-            file = open("Indexes/{}.txt".format(query[0]), "r")
+            try:
+                file = open("Indexes/{}.txt".format(query[0]), "r")
+            except:
+                raise QueryNotFound("File Not Found!")
             d = dict(eval(file.read()))
             self.cache[query[0]] = d
 
