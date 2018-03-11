@@ -1,6 +1,7 @@
 import json
 import search_utils
 from collections import defaultdict
+from urlparse import urljoin
 
 class QueryHandler:
     def __init__(self):
@@ -30,8 +31,8 @@ class QueryHandler:
 
         return docIDs
 
-    def getInput(self):
-        userInput = raw_input("\nEnter Query: ").lower()
+    def processInput(self,query):
+        userInput = query.lower()
         words = search_utils.simplifyText(userInput).split(" ")
         result = []
         for word in words:
@@ -46,20 +47,18 @@ class QueryHandler:
     def rankingAlgorithm(self, info, additionalInfo=None, results=5):
         sortedInfo = sorted(info.keys(), key=lambda k: (-len(info[k]), -sum([l[1] for l in info[k]])/len(info[k]) ))
 
-        if len(sortedInfo) < 5:
+        result = []
+
+        if len(sortedInfo) < results:
             for i,k in enumerate(sortedInfo,1):
-                print("{}. {}".format(i, self.bookkeepingMap[k]))
+                result.append("http://"+self.bookkeepingMap[k].encode('UTF-8', 'strict'))
         else:
-            for i, k in enumerate(sortedInfo[:5], 1):
-                print("{}. {}".format(i, self.bookkeepingMap[k]))
+            for i, k in enumerate(sortedInfo[:results], 1):
+                result.append("http://"+self.bookkeepingMap[k].encode('UTF-8', 'strict'))
 
-    def run(self):
-        while (True):
-            words = self.getInput()
-            info = self.lookupQuery(words)
-            self.rankingAlgorithm(info=info)
-            if raw_input("Continue [y/n]? ") == 'n':
-                break
+        return result
 
-QueryHandler().run()
-
+    def getLinks(self, query, maxResults=5):
+        words = self.processInput(query)
+        info = self.lookupQuery(words)
+        return self.rankingAlgorithm(info=info, results=maxResults)
